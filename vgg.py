@@ -133,3 +133,39 @@ def getVGGModel():
 	vggmodel.load_weights('vgg16_weights_tf_dim_ordering_tf_kernels.h5')
 	return vggmodel
 
+batch_size = 4
+path = 'D:/fastai/data'
+
+
+
+def get_batches(dirname, gen=image.ImageDataGenerator(), shuffle=True, 
+                batch_size=batch_size, class_mode='categorical', target_size=(224,224)):
+    return gen.flow_from_directory(path+dirname, target_size=target_size, 
+                class_mode=class_mode, shuffle=shuffle, batch_size=batch_size)
+
+
+# In[50]:
+
+
+
+import PIL
+
+
+
+
+def pred_batch(imgs):
+    preds = Model.predict(imgs)
+    idxs = np.argmax(preds, axis=1)
+
+    print('Shape: {}'.format(preds.shape))
+    print('First 5 classes: {}'.format(classes[:5]))
+    print('First 5 probabilities: {}\n'.format(preds[0, :5]))
+    print('Predictions prob/class: ')
+    
+    for i in range(len(idxs)):
+        idx = idxs[i]
+        print ('  {:.4f}/{}'.format(preds[i, idx], classes[idx]))
+
+def get_data(dirname, target_size=(224,224)):
+    batches = get_batches(dirname, shuffle=False, batch_size=1, class_mode=None, target_size=target_size)
+    return np.concatenate([batches.next() for i in range(batches.samples)])
